@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZipStream Pro | Advanced Compression</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #8b5cf6;
+            --accent-hover: #7c3aed;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Animated Background Blobs */
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(99, 102, 241, 0.15);
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: -1;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-20%, -20%); }
+            to { transform: translate(20%, 20%); }
+        }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 3rem;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .logo-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            background: linear-gradient(to right, #a78bfa, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h1 { font-size: 2rem; margin: 0; font-weight: 700; letter-spacing: -0.025em; }
+        p { color: #94a3b8; margin-top: 0.5rem; margin-bottom: 2.5rem; }
+
+        /* The Upload Area */
+        .upload-card {
+            position: relative;
+            border: 2px dashed #475569;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 16px;
+            padding: 3rem 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-card:hover {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.08);
+            transform: scale(1.02);
+        }
+
+        .upload-card.active {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Settings Bar */
+        .settings {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        select {
+            background: #0f172a;
+            color: white;
+            border: 1px solid var(--glass-border);
+            padding: 8px 12px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        /* Action Button */
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:active { transform: translateY(0); }
+
+        .file-list {
+            font-size: 0.85rem;
+            color: #a78bfa;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="blob"></div>
+
+<div class="container">
+    <div class="logo-icon">📂</div>
+    <h1>ZipStream Pro</h1>
+    <p>Local. Powerful. Private.</p>
+
+    <form action="/compress" method="post" enctype="multipart/form-data">
+        <div class="upload-card" id="drop-zone">
+            <div id="icon-state">☁️</div>
+            <div id="text-state" style="margin-top: 10px; font-weight: 500;">Drop files or click to browse</div>
+            <input type="file" name="files" multiple required onchange="handleFiles(this)">
+            <div id="file-count" class="file-list"></div>
+        </div>
+
+        <div class="settings">
+            <select name="level">
+                <option value="9">Maximum Compression</option>
+                <option value="6" selected>Fast Compression</option>
+                <option value="0">Store (No Compression)</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary">Generate ZIP Archive</button>
+    </form>
+</div>
+
+<script>
+    function handleFiles(input) {
+        const dropZone = document.getElementById('drop-zone');
+        const textState = document.getElementById('text-state');
+        const iconState = document.getElementById('icon-state');
+        const fileCount = document.getElementById('file-count');
+
+        if (input.files.length > 0) {
+            dropZone.classList.add('active');
+            iconState.innerText = "✅";
+            textState.innerText = "Files Loaded Successfully";
+            fileCount.innerText = input.files.length + " items selected";
+        }
+    }
+</script>
+
+</body>
+</html>
